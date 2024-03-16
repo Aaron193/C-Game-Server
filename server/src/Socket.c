@@ -4,6 +4,7 @@
 #include "../include/Packet.h"
 #include <pthread.h>
 #include <stdio.h>
+#include <string.h>
 
 #define PORT_NUMBER 8080
 #define MESSAGE_BINARY 2
@@ -53,6 +54,11 @@ void onmessage(ws_cli_conn_t* client, const unsigned char* msg, uint64_t size, i
     Buffer* buffer = Buffer_create(msg, size);
 
     Packet_readFrom(buffer);
+
+    // len , ...hello in ascii
+    char response[] = { 5, 0, 72, 101, 108, 108, 111 };
+    // terrible way to send hello to the client
+    ws_sendframe_bin(client, response, 7);
 
     /* TODO
         This read buffer can be global and rewritten

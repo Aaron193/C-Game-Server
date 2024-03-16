@@ -9,7 +9,7 @@ typedef struct {
     size_t index;
 } Buffer;
 
-Buffer* Buffer_create(const unsigned char* bytes, size_t size)
+Buffer* Buffer_create(unsigned char* bytes, size_t size)
 {
     Buffer* buffer = (Buffer*)malloc(sizeof(Buffer));
     if (buffer == NULL) {

@@ -60,11 +60,12 @@ export default class BitStream {
 
     public r_str() {
         const len = this.r_ui16();
-        this._verifyBounds(len * 2);
+        this._verifyBounds(len);
 
         let str = '';
         for (let i = 0; i < len; i++) {
-            str += String.fromCharCode(this.buffer[this.index++] | (this.buffer[this.index++] << 8));
+            // str += String.fromCharCode(this.buffer[this.index++] | (this.buffer[this.index++] << 8));
+            str += String.fromCharCode(this.buffer[this.index++]);
         }
 
         return str;
