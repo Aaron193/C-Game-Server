@@ -1,4 +1,5 @@
-import { BitStream } from './Buffer';
+import BitStream from './network/Buffer';
+
 const ws = new WebSocket('ws://localhost:8080');
 ws.binaryType = 'arraybuffer';
 
@@ -33,8 +34,3 @@ ws.onmessage = message => {
 ws.onclose = () => {
     console.log('disconnected');
 };
-
-// TODO: implement
-class Packet {
-    constructor() {}
-}
