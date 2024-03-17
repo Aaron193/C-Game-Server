@@ -29,7 +29,7 @@ void EDict_insert(EDict* dict, size_t id, size_t address)
 size_t EDict_find(EDict* dict, size_t id)
 {
     size_t index = HashMap_get(dict->map, id);
-    if (index == -1) return NULL;
+    if (index == (size_t)-1) return NULL; // cast for compiler
 
     return dict->list->array[index];
 }
@@ -37,7 +37,7 @@ size_t EDict_find(EDict* dict, size_t id)
 void EDict_remove(EDict* dict, size_t id)
 {
     size_t index = HashMap_get(dict->map, id);
-    if (index == -1) return;
+    if (index == (size_t)-1) return; // cast for compiler
 
     size_t len = dict->list->length;
 

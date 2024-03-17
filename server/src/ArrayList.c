@@ -75,7 +75,7 @@ size_t ArrayList_pop(ArrayList* list)
 
 size_t ArrayList_indexOf(ArrayList* list, size_t address)
 {
-    for (int i = 0; i < list->length; ++i) {
+    for (size_t i = 0; i < list->length; ++i) {
         if (list->array[i] == address) {
             return i;
         }
@@ -87,7 +87,7 @@ void ArrayList_removeIndex(ArrayList* list, size_t index)
 {
     if (index >= list->length) return;
 
-    for (int i = index; i < list->length - 1; ++i) {
+    for (size_t i = index; i < list->length - 1; ++i) {
         list->array[i] = list->array[i + 1];
     }
     list->length--;
@@ -100,7 +100,7 @@ void ArrayList_removeIndex(ArrayList* list, size_t index)
 void ArrayList_remove(ArrayList* list, size_t address)
 {
     size_t index = ArrayList_indexOf(list, address);
-    if (index != -1) {
+    if (index != (size_t)-1) { // cast just for compiler
         ArrayList_removeIndex(list, index);
     }
 

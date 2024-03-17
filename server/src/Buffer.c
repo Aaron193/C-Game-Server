@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 // typedef struct {
 //     unsigned char bytes[0xfff];
@@ -28,6 +27,21 @@
 //     buffer->index = 0;
 //     return buffer;
 // }
+
+void Buffer_loadBuffer(Buffer* buffer, unsigned char* bytes, size_t size)
+{
+    if (size > 0xfff) {
+        printf("Buffer size too big\n");
+        exit(1);
+    }
+
+    for (size_t i = 0; i < size; i++) {
+        buffer->bytes[i] = bytes[i];
+    }
+
+    buffer->size = size;
+    buffer->index = 0;
+}
 
 void _Buffer_verifyBounds(Buffer* buffer, size_t size)
 {
@@ -90,7 +104,6 @@ void Buffer_r_str(Buffer* buffer, char* out, uint16_t length)
 void Buffer_w_ui8(Buffer* buffer, uint8_t value)
 {
     _Buffer_verifyBounds(buffer, sizeof(uint8_t));
-
     buffer->bytes[buffer->index++] = value;
 }
 

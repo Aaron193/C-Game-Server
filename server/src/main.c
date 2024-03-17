@@ -1,6 +1,8 @@
 #include "../include/Client.h"
 #include "../include/Socket.h"
 #include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -14,10 +16,32 @@ void Physics_update(double deltaTime)
 
 void Game_update(double deltaTime)
 {
+
+    /* Send Client Buffers */
+    for (size_t i = 0; i < clients->list->length; i++) {
+        Client* client = (Client*)clients->list->array[i];
+
+        if (client->outBuffer.index > 0) {
+            ws_sendframe_bin(
+                client->connection,
+                (const char*)&client->outBuffer.bytes,
+                client->outBuffer.index);
+            client->outBuffer.index = 0;
+        }
+    }
+}
+
+void bye()
+{
+    printf("So long, suckers!\n");
 }
 
 int main()
 {
+    if (atexit(bye) != 0) {
+        fprintf(stderr, "Failed to register cleanup function\n");
+        return 1;
+    }
 
     Socket_start();
 

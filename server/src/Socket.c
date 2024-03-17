@@ -1,6 +1,8 @@
 #include "../include/Socket.h"
 #include "../external/wsServer/include/ws.h"
+#include "../include/Client.h"
 #include "../include/EDict.h"
+#include "../include/Packet.h"
 #include <pthread.h>
 #include <stdio.h>
 
@@ -18,7 +20,7 @@ struct ws_server_params {
     int timeout_ms;
 };
 
-int id = 0;
+int id = 1;
 
 /**
  * @brief This function is called whenever a new connection is opened.
@@ -27,10 +29,12 @@ int id = 0;
 void onopen(ws_cli_conn_t* client)
 {
     printf("Client connected to the websocket\n");
+
     int next_id = id++;
+    Client* c = Client_create(client, next_id);
+
     HashMap_set(idMap, (size_t)client, next_id);
-    // Can put the address of my actual Client structure here!! \/
-    EDict_insert(clients, next_id, (size_t)client);
+    EDict_insert(clients, next_id, (size_t)c);
 }
 
 /**
@@ -41,7 +45,10 @@ void onclose(ws_cli_conn_t* client)
 {
     printf("Client disconnected from the websocket\n");
     int id = (int)HashMap_get(idMap, (size_t)client);
+    Client* c = (Client*)EDict_find(clients, id);
     EDict_remove(clients, id);
+
+    free(c);
 }
 
 /**
@@ -51,7 +58,7 @@ void onclose(ws_cli_conn_t* client)
  * @param size   Message size.
  * @param type   Message type.
  */
-void onmessage(ws_cli_conn_t* client, const unsigned char* msg, uint64_t size, int type)
+void onmessage(ws_cli_conn_t* connection, const unsigned char* msg, uint64_t size, int type)
 {
     if (type != MESSAGE_BINARY) return;
 
@@ -60,30 +67,21 @@ void onmessage(ws_cli_conn_t* client, const unsigned char* msg, uint64_t size, i
         return;
     }
 
-    int id = (int)HashMap_get(idMap, (size_t)client);
-    ws_cli_conn_t* cli = (ws_cli_conn_t*)EDict_find(clients, id);
-    printf("did it work?? %d\n", cli == client);
+    int id = (int)HashMap_get(idMap, (size_t)connection);
+    Client* client = (Client*)EDict_find(clients, id);
+    Buffer* buffer = &client->inBuffer;
 
-    // Buffer* buffer = Buffer_create(msg, size);
-
-    // Packet_readFrom(buffer);
-
-    // // len , ...hello in ascii
-    // char response[] = { 5, 0, 72, 101, 108, 108, 111 };
-    // // terrible way to send hello to the client
-    // ws_sendframe_bin(client, response, 7);
-
-    // /* TODO
-    //     This read buffer can be global and rewritten
-    //     every new message --> prevent destroy each time
-    // */
-    // Buffer_destroy(buffer);
+    Buffer_loadBuffer(buffer, (unsigned char*)msg, size);
+    Packet_readFrom(buffer, client);
 }
 
 bool _isServerRunning = false;
 
 void Socket_start()
 {
+    /**
+        TODO: figure out when/if/where these should be freed
+    */
     clients = EDict_create();
     idMap = HashMap_create();
 

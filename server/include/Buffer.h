@@ -6,12 +6,15 @@
 
 typedef struct {
     unsigned char bytes[0xfff];
+    // unsigned char *bytes;
     size_t size;
     size_t index;
 } Buffer;
 
 Buffer* Buffer_create(unsigned char* bytes, size_t size);
 void Buffer_destroy(Buffer* buffer);
+
+void Buffer_loadBuffer(Buffer* buffer, unsigned char* bytes, size_t size);
 
 uint8_t Buffer_r_ui8(Buffer* buffer);
 uint16_t Buffer_r_ui16(Buffer* buffer);

@@ -36,8 +36,8 @@ ws.onmessage = message => {
     console.log(new Uint8Array(message.data));
 
     readBuffer.loadBuffer(new Uint8Array(message.data));
-    const msg = readBuffer.r_str();
-    console.log(msg);
+    // const msg = readBuffer.r_str();
+    // console.log(msg);
     // while (!readBuffer.isEmpty()) {
     //     const header = readBuffer.r_ui8();
     //     switch (header) {

@@ -1,4 +1,5 @@
 #include "../include/Buffer.h"
+#include "../include/Client.h"
 #include "../include/Vec2.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -9,7 +10,7 @@ enum NETWORK_HEADERS {
     MOUSE
 };
 
-void Packet_readFrom(Buffer* buffer)
+void Packet_readFrom(Buffer* buffer, Client* client)
 {
     while (buffer->index < buffer->size) {
         uint8_t packetType = Buffer_r_ui8(buffer);
@@ -22,6 +23,13 @@ void Packet_readFrom(Buffer* buffer)
                 Buffer_r_str(buffer, nickname, length);
 
                 printf("Spawn packet: [version]: %d  [nickname]: %s \n", clientVersion, nickname);
+
+                // write some data to the client
+                Buffer* outBuffer = &client->outBuffer;
+                Buffer_w_ui8(outBuffer, 1);
+                Buffer_w_ui8(outBuffer, 2);
+                Buffer_w_ui8(outBuffer, 3);
+                Buffer_w_ui8(outBuffer, 4);
 
             } break;
             case MOVEMENT: {
