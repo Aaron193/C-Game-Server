@@ -1,152 +1,147 @@
-// #include <stddef.h>
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <string.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-// typedef struct {
-//     void** array;
-//     size_t size;
-//     size_t capacity;
-//     size_t itemSize; // Size of each item in bytes
-//     void (*printItem)(void*); // Function pointer to print individual items
-//     void (*freeItem)(void*); // Function pointer to free individual items
-// } ArrayList;
+#define INIT_CAPACITY 10
 
-// ArrayList* ArrayList_create(size_t initialCapacity, size_t itemSize, void (*printItem)(void*), void (*freeItem)(void*))
+typedef struct {
+    size_t* array; // array of pointers to some object
+    size_t length;
+    size_t capacity;
+} ArrayList;
+
+ArrayList* ArrayList_create()
+{
+    ArrayList* list = (ArrayList*)malloc(sizeof(ArrayList));
+
+    if (list == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    list->array = (size_t*)malloc(INIT_CAPACITY * sizeof(size_t));
+
+    if (list->array == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        free(list);
+        exit(EXIT_FAILURE);
+    }
+
+    list->length = 0;
+    list->capacity = INIT_CAPACITY;
+
+    return list;
+}
+
+float _ArrayList_loadFactor(ArrayList* list)
+{
+    return (float)list->length / list->capacity;
+}
+
+float _ArrayList_resize(ArrayList* list, size_t newCapacity)
+{
+    list->array = (size_t*)realloc(list->array, newCapacity * sizeof(size_t));
+
+    if (list->array == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    list->capacity = newCapacity;
+    return _ArrayList_loadFactor(list);
+}
+
+void ArrayList_push(ArrayList* list, size_t address)
+{
+    if (_ArrayList_loadFactor(list) > 0.75) {
+        _ArrayList_resize(list, list->capacity * 2);
+    }
+
+    list->array[list->length++] = address;
+}
+
+size_t ArrayList_pop(ArrayList* list)
+{
+    if (_ArrayList_loadFactor(list) < 0.25) {
+        _ArrayList_resize(list, list->capacity / 2);
+    }
+
+    if (list->length > 0) {
+        return list->array[--list->length];
+    }
+    return 0;
+}
+
+size_t ArrayList_indexOf(ArrayList* list, size_t address)
+{
+    for (int i = 0; i < list->length; ++i) {
+        if (list->array[i] == address) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void ArrayList_removeIndex(ArrayList* list, size_t index)
+{
+    if (index >= list->length) return;
+
+    for (int i = index; i < list->length - 1; ++i) {
+        list->array[i] = list->array[i + 1];
+    }
+    list->length--;
+
+    if (_ArrayList_loadFactor(list) < 0.25) {
+        _ArrayList_resize(list, list->capacity / 2);
+    }
+}
+
+void ArrayList_remove(ArrayList* list, size_t address)
+{
+    size_t index = ArrayList_indexOf(list, address);
+    if (index != -1) {
+        ArrayList_removeIndex(list, index);
+    }
+
+    if (_ArrayList_loadFactor(list) < 0.25) {
+        _ArrayList_resize(list, list->capacity / 2);
+    }
+}
+
+void ArrayList_swap(ArrayList* list, size_t index1, size_t index2)
+{
+    if (index1 >= list->length || index2 >= list->length) return;
+
+    size_t temp = list->array[index1];
+    list->array[index1] = list->array[index2];
+    list->array[index2] = temp;
+}
+
+void ArrayList_destroy(ArrayList* list)
+{
+    free(list->array);
+    free(list);
+}
+
+// =====================TEST=====================
+
+// int main()
 // {
-//     ArrayList* list = (ArrayList*)malloc(sizeof(ArrayList));
-//     if (list == NULL) {
+
+//     size_t* array = (size_t*)malloc(1 * sizeof(size_t));
+//     if (array == NULL) {
 //         fprintf(stderr, "Memory allocation failed\n");
 //         exit(EXIT_FAILURE);
 //     }
 
-//     list->array = (void**)malloc(initialCapacity * sizeof(void*));
-//     if (list->array == NULL) {
-//         fprintf(stderr, "Memory allocation failed\n");
-//         free(list);
-//         exit(EXIT_FAILURE);
-//     }
+//     int a = 10;
 
-//     list->size = 0;
-//     list->capacity = initialCapacity;
-//     list->itemSize = itemSize;
-//     list->printItem = printItem;
-//     list->freeItem = freeItem;
+//     array[0] = (size_t)&a;
 
-//     return list;
+//     int deref = *(int*)(array[0]);
+
+//     // printf("First element: %zu\n", *(int*)(array[0]));
+//     // printf("Casted to size_t: %zu\n", &a);
+//     return 0;
 // }
-
-// void ArrayList_append(ArrayList* list, void* element)
-// {
-//     if (list->size >= list->capacity) {
-//         // Resize the array
-//         list->capacity *= 2;
-//         list->array = (void**)realloc(list->array, list->capacity * sizeof(void*));
-//         if (list->array == NULL) {
-//             fprintf(stderr, "Memory allocation failed\n");
-//             exit(EXIT_FAILURE);
-//         }
-//     }
-
-//     // Allocate memory for the new item and copy the data
-//     void* newItem = (void*)malloc(list->itemSize);
-//     if (newItem == NULL) {
-//         fprintf(stderr, "Memory allocation failed\n");
-//         exit(EXIT_FAILURE);
-//     }
-//     memcpy(newItem, element, list->itemSize);
-
-//     // Add the new item to the array
-//     list->array[list->size++] = newItem;
-// }
-
-// void ArrayList_deleteLast(ArrayList* list)
-// {
-//     if (list->size > 0) {
-//         list->freeItem(list->array[list->size - 1]);
-//         free(list->array[list->size - 1]);
-//         list->size--;
-//     }
-// }
-
-// void ArrayList_swapIndices(ArrayList* list, size_t index1, size_t index2)
-// {
-//     if (index1 < list->size && index2 < list->size) {
-//         void* temp = list->array[index1];
-//         list->array[index1] = list->array[index2];
-//         list->array[index2] = temp;
-//     }
-// }
-
-// void ArrayList_print(ArrayList* list)
-// {
-//     printf("ArrayList: ");
-//     for (size_t i = 0; i < list->size; ++i) {
-//         list->printItem(list->array[i]);
-//         printf(" ");
-//     }
-//     printf("\n");
-// }
-
-// void ArrayList_destroy(ArrayList* list)
-// {
-//     // Free individual items and then the array
-//     for (size_t i = 0; i < list->size; ++i) {
-//         list->freeItem(list->array[i]);
-//         free(list->array[i]);
-//     }
-//     free(list->array);
-//     free(list);
-// }
-
-// // =====================TEST=====================
-
-// // // Define a sample structure
-// // typedef struct {
-// //     int value;
-// // } SampleItem;
-
-// // // Function to print a sample item
-// // void printSampleItem(void* item)
-// // {
-// //     SampleItem* sample = (SampleItem*)item;
-// //     printf("%d", sample->value);
-// // }
-
-// // // Function to free a sample item
-// // void freeSampleItem(void* item)
-// // {
-// //     free((SampleItem*)item);
-// // }
-
-// // int main()
-// // {
-// //     // Create an ArrayList of SampleItem
-// //     ArrayList* list = ArrayList_create(5, sizeof(SampleItem), &printSampleItem, &freeSampleItem);
-
-// //     // Append some SampleItems
-// //     for (int i = 1; i <= 5; ++i) {
-// //         SampleItem* newItem = (SampleItem*)malloc(sizeof(SampleItem));
-// //         if (newItem == NULL) {
-// //             fprintf(stderr, "Memory allocation failed\n");
-// //             exit(EXIT_FAILURE);
-// //         }
-// //         newItem->value = i;
-// //         ArrayList_append(list, newItem);
-// //     }
-
-// //     // Print the ArrayList
-// //     ArrayList_print(list); // Output: ArrayList: 1 2 3 4 5
-// //     // Delete the last item
-// //     ArrayList_deleteLast(list);
-// //     ArrayList_print(list); // Output: ArrayList: 1 2 3 4
-
-// //     // Swap indices
-// //     ArrayList_swapIndices(list, 0, 3);
-// //     ArrayList_print(list); // Output: ArrayList: 4 2 3 1
-
-// //     // Free memory
-// //     ArrayList_destroy(list);
-
-// //     return 0;
-// // }

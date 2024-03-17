@@ -1,21 +1,27 @@
-// #include <stddef.h>
-// #include <stdbool.h>
+#ifndef HASHMAP_H
+#define HASHMAP_H
 
-// typedef struct {
-//     int key;
-//     int value;
-//     bool filled;
-// } HashNode;
+#include <stddef.h>
+#include <stdbool.h>
 
-// typedef struct {
-//     HashNode* array;
-//     int size;
-//     size_t capacity;
-// } HashMap;
+typedef struct {
+    size_t key;
+    size_t value;
+    bool filled;
+} HashNode;
+
+typedef struct {
+    HashNode* array;
+    size_t size;
+    size_t capacity;
+} HashMap;
 
 
-// HashMap* HashMap_create(size_t initialCapacity);
-// bool HashMap_has(HashMap* map, int key);
-// int HashMap_get(HashMap* map, int key);
-// void HashMap_set(HashMap* map, int key, int value);
-// void HashMap_remove(HashMap* map, int key);
+HashMap* HashMap_create();
+bool HashMap_has(HashMap* map, size_t key);
+size_t HashMap_get(HashMap* map, size_t key);
+void HashMap_set(HashMap* map, size_t key, size_t value);
+void HashMap_remove(HashMap* map, size_t key);
+void HashMap_destroy(HashMap* map);
+
+#endif /* HASHMAP_H */

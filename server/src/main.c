@@ -1,7 +1,6 @@
-#include "../external/wsServer/include/ws.h"
+#include "../include/Client.h"
 #include "../include/Socket.h"
 #include <pthread.h>
-#include <stdio.h>
 #include <time.h>
 #include <unistd.h>
 

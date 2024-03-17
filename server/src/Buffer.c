@@ -1,27 +1,33 @@
+#include "../include/Buffer.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct {
-    unsigned char* bytes;
-    size_t size;
-    size_t index;
-} Buffer;
+// typedef struct {
+//     unsigned char bytes[0xfff];
+//     size_t size;
+//     size_t index;
+// } Buffer;
 
-Buffer* Buffer_create(unsigned char* bytes, size_t size)
-{
-    Buffer* buffer = (Buffer*)malloc(sizeof(Buffer));
-    if (buffer == NULL) {
-        printf("Failed to allocate memory for buffer\n");
-        exit(1);
-    }
+// Buffer* Buffer_create(unsigned char* bytes, size_t size)
+// {
+//     if (size > 0xfff) {
+//         printf("Buffer size too big\n");
+//         exit(1);
+//     }
 
-    buffer->bytes = bytes;
-    buffer->size = size;
-    buffer->index = 0;
-    return buffer;
-}
+//     Buffer* buffer = (Buffer*)malloc(sizeof(Buffer));
+//     if (buffer == NULL) {
+//         printf("Failed to allocate memory for buffer\n");
+//         exit(1);
+//     }
+
+//     buffer->bytes = bytes;
+//     buffer->size = size;
+//     buffer->index = 0;
+//     return buffer;
+// }
 
 void _Buffer_verifyBounds(Buffer* buffer, size_t size)
 {
@@ -123,7 +129,7 @@ void Buffer_w_f32(Buffer* buffer, float value)
 }
 
 // length = byte-length
-void Buffer_w_str(Buffer* buffer, const char* value, uint16_t length)
+void Buffer_w_str(Buffer* buffer, char* value, uint16_t length)
 {
     _Buffer_verifyBounds(buffer, length);
 
